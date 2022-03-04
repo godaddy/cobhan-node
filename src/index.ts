@@ -14,7 +14,7 @@ export function json_to_cbuffer(obj: any): Buffer {
   return string_to_cbuffer(JSON.stringify(obj))
 }
 
-export function string_to_cbuffer(str: string): Buffer {
+export function string_to_cbuffer(str: string | undefined): Buffer {
   if (str == null) {
     const buffer = Buffer.allocUnsafe(header_size)
     buffer.writeInt64LE(0, 0)
