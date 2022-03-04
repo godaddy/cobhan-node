@@ -1,6 +1,6 @@
 {
   "name": "cobhan",
-  "version": "1.0.20",
+  "version": "1.0.22",
   "description": "Functions to enable cobhan wrapper libraries",
   "main": "dist/index.js",
   "scripts": {
@@ -9,6 +9,9 @@
   },
   "author": "Jeremiah Gowdy",
   "license": "MIT",
+  "files": [
+    "dist/index.d.ts"
+  ],
   "dependencies": {
     "ffi-napi": "^4.0.3",
     "fs": "^0.0.1-security"
@@ -22,5 +25,5 @@
     "eslint-config-google": "^0.14.0",
     "typescript": "^4.6.2"
   },
-  "types": "./dist/index.d.ts"
+  "types": "dist/index.d.ts"
 }
