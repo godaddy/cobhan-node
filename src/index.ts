@@ -5,7 +5,7 @@ import fs from 'fs';
 const header_size = 64 / 8
 const sizeof_int32 = 32 / 8
 
-export function json_to_cbuffer(obj: any): Buffer {
+export function json_to_cbuffer(obj: any | null): Buffer {
   if (obj == null) {
     const buffer = Buffer.allocUnsafe(header_size)
     buffer.writeInt64LE(0, 0)
@@ -14,7 +14,7 @@ export function json_to_cbuffer(obj: any): Buffer {
   return string_to_cbuffer(JSON.stringify(obj))
 }
 
-export function string_to_cbuffer(str: string | undefined): Buffer {
+export function string_to_cbuffer(str: string | null): Buffer {
   if (str == null) {
     const buffer = Buffer.allocUnsafe(header_size)
     buffer.writeInt64LE(0, 0)
