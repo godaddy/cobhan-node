@@ -5,7 +5,7 @@ import fs from 'fs';
 const header_size = 64 / 8
 const sizeof_int32 = 32 / 8
 
-function json_to_cbuffer(obj: any): Buffer {
+export function json_to_cbuffer(obj: any): Buffer {
   if (obj == null) {
     const buffer = Buffer.allocUnsafe(header_size)
     buffer.writeInt64LE(0, 0)
@@ -14,7 +14,7 @@ function json_to_cbuffer(obj: any): Buffer {
   return string_to_cbuffer(JSON.stringify(obj))
 }
 
-function string_to_cbuffer(str: string): Buffer {
+export function string_to_cbuffer(str: string): Buffer {
   if (str == null) {
     const buffer = Buffer.allocUnsafe(header_size)
     buffer.writeInt64LE(0, 0)
@@ -28,17 +28,17 @@ function string_to_cbuffer(str: string): Buffer {
   return buffer
 }
 
-function int64_to_buffer(number: number): Buffer {
+export function int64_to_buffer(number: number): Buffer {
   const buffer: Buffer = Buffer.allocUnsafe(64 / 8)
   buffer.writeBigInt64LE(BigInt(number), 0)
   return buffer
 }
 
-function buffer_to_int64(buffer: Buffer): string | number {
+export function buffer_to_int64(buffer: Buffer): string | number {
   return buffer.readInt64LE(0)
 }
 
-function cbuffer_to_string(buf: Buffer): string {
+export function cbuffer_to_string(buf: Buffer): string {
   const length: number = buf.readInt32LE(0)
   if (length < 0) {
     return temp_to_string(buf, length)
@@ -46,7 +46,7 @@ function cbuffer_to_string(buf: Buffer): string {
   return buf.toString('utf8', header_size, length + header_size)
 }
 
-function cbuffer_to_json(buf: Buffer): any {
+export function cbuffer_to_json(buf: Buffer): any {
   const str = cbuffer_to_string(buf)
   return JSON.parse(str)
 }
@@ -59,7 +59,7 @@ function temp_to_string(buf: Buffer, length: number): string {
   return result
 }
 
-function cbuffer_to_buffer(buf: Buffer): Buffer {
+export function cbuffer_to_buffer(buf: Buffer): Buffer {
   const length = buf.readInt32LE(0)
   if (length < 0) {
     return temp_to_buffer(buf, length)
@@ -75,7 +75,7 @@ function temp_to_buffer(buf: Buffer, length: number): Buffer {
   return result
 }
 
-function buffer_to_cbuffer(buf: Buffer): Buffer {
+export function buffer_to_cbuffer(buf: Buffer): Buffer {
   const buffer = Buffer.allocUnsafe(header_size + buf.byteLength)
   buffer.writeInt32LE(buf.byteLength, 0)
   buffer.writeInt32LE(0, sizeof_int32) // Reserved - must be zero
@@ -83,14 +83,14 @@ function buffer_to_cbuffer(buf: Buffer): Buffer {
   return buffer
 }
 
-function allocate_cbuffer(size: number): Buffer {
+export function allocate_cbuffer(size: number): Buffer {
   const buffer = Buffer.allocUnsafe(header_size + size)
   buffer.writeInt32LE(size, 0)
   buffer.writeInt32LE(0, sizeof_int32) // Reserved - must be zero
   return buffer
 }
 
-function load_platform_library(libraryPath: string, libraryName: string, functions: any): ffi.Library {
+export function load_platform_library(libraryPath: string, libraryName: string, functions: any): ffi.Library {
 
   let osExt = { 'win32': '.dll', 'linux': '.so', 'darwin': '.dylib' }[process.platform.toLowerCase()];
   if (typeof osExt === 'undefined') {
@@ -128,10 +128,6 @@ function load_platform_library(libraryPath: string, libraryName: string, functio
   return library
 }
 
-function load_library_direct(libraryFilePath: string, functions: any): ffi.Library {
+export function load_library_direct(libraryFilePath: string, functions: any): ffi.Library {
   return new ffi.Library(libraryFilePath, functions);
 }
-
-export default {
-  load_platform_library, string_to_cbuffer, cbuffer_to_string, cbuffer_to_buffer, buffer_to_cbuffer, allocate_cbuffer, int64_to_buffer, buffer_to_int64, load_library_direct, json_to_cbuffer, cbuffer_to_json
-};
