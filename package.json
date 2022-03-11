@@ -1,6 +1,6 @@
 {
   "name": "cobhan",
-  "version": "1.0.29",
+  "version": "1.0.30",
   "description": "Functions to enable cobhan wrapper libraries",
   "main": "dist/cobhan.js",
   "scripts": {
