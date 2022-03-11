@@ -12,11 +12,6 @@ if (Buffer.poolSize < minimum_pool_size) {
 }
 
 export function json_to_cbuffer(obj: any | null): Buffer {
-  if (obj == null) {
-    const buffer = Buffer.allocUnsafe(header_size)
-    buffer.writeInt64LE(0, 0)
-    return buffer
-  }
   return string_to_cbuffer(JSON.stringify(obj))
 }
 
@@ -30,7 +25,9 @@ export function string_to_cbuffer(str: string | null): Buffer {
   const buffer: Buffer = Buffer.allocUnsafe(header_size + str.length * 2)
   buffer.writeInt32LE(str.length, 0)
   buffer.writeInt32LE(0, sizeof_int32) // Reserved - must be zero
-  buffer.write(str, header_size, 'utf8')
+  if (str.length > 0) {
+    buffer.write(str, header_size, 'utf8')
+  }
   return buffer
 }
 
@@ -57,28 +54,12 @@ export function cbuffer_to_json(buf: Buffer): any {
   return JSON.parse(str)
 }
 
-function temp_to_string(buf: Buffer, length: number): string {
-  length = 0 - length
-  const tempfilename: string = buf.toString('utf8', header_size, length + header_size)
-  const result: string = fs.readFileSync(tempfilename, 'utf8')
-  fs.unlinkSync(tempfilename)
-  return result
-}
-
 export function cbuffer_to_buffer(buf: Buffer): Buffer {
   const length = buf.readInt32LE(0)
   if (length < 0) {
     return temp_to_buffer(buf, length)
   }
   return buf.slice(header_size, header_size + length)
-}
-
-function temp_to_buffer(buf: Buffer, length: number): Buffer {
-  length = 0 - length
-  const tempfilename: string = buf.toString('utf8', header_size, length + header_size)
-  const result: Buffer = fs.readFileSync(tempfilename)
-  fs.unlinkSync(tempfilename)
-  return result
 }
 
 export function buffer_to_cbuffer(buf: Buffer): Buffer {
@@ -136,4 +117,20 @@ export function load_platform_library(libraryPath: string, libraryName: string, 
 
 export function load_library_direct(libraryFilePath: string, functions: any): ffi.Library {
   return new ffi.Library(libraryFilePath, functions);
+}
+
+function temp_to_buffer(buf: Buffer, length: number): Buffer {
+  length = 0 - length
+  const tempfilename: string = buf.toString('utf8', header_size, length + header_size)
+  const result: Buffer = fs.readFileSync(tempfilename)
+  fs.unlinkSync(tempfilename)
+  return result
+}
+
+function temp_to_string(buf: Buffer, length: number): string {
+  length = 0 - length
+  const tempfilename: string = buf.toString('utf8', header_size, length + header_size)
+  const result: string = fs.readFileSync(tempfilename, 'utf8')
+  fs.unlinkSync(tempfilename)
+  return result
 }
