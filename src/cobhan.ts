@@ -5,7 +5,7 @@ import fs from 'fs';
 const header_size = 64 / 8
 const sizeof_int32 = 32 / 8
 
-const minimum_pool_size = 20971520
+const minimum_pool_size = 131072
 
 if (Buffer.poolSize < minimum_pool_size) {
   Buffer.poolSize = minimum_pool_size;
