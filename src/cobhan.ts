@@ -5,6 +5,12 @@ import fs from 'fs';
 const header_size = 64 / 8
 const sizeof_int32 = 32 / 8
 
+const minimum_pool_size = 20971520
+
+if (Buffer.poolSize < minimum_pool_size) {
+  Buffer.poolSize = minimum_pool_size;
+}
+
 export function json_to_cbuffer(obj: any | null): Buffer {
   if (obj == null) {
     const buffer = Buffer.allocUnsafe(header_size)
