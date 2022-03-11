@@ -66,7 +66,7 @@ export function buffer_to_cbuffer(buf: Buffer): Buffer {
   const buffer = Buffer.allocUnsafe(header_size + buf.byteLength)
   buffer.writeInt32LE(buf.byteLength, 0)
   buffer.writeInt32LE(0, sizeof_int32) // Reserved - must be zero
-  buffer.fill(buf, header_size)
+  buf.copy(buffer, header_size);
   return buffer
 }
 
