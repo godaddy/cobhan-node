@@ -2,10 +2,11 @@ import ffi from 'ffi-napi';
 import path from 'path';
 import fs from 'fs';
 
-const header_size = 64 / 8
-const sizeof_int32 = 32 / 8
+const header_size = 64 / 8;
+const sizeof_int32 = 32 / 8;
 
-const minimum_pool_size = 131072
+const minimum_pool_size = 131072;
+const minimum_cbuffer_size = 1024;
 
 if (Buffer.poolSize < minimum_pool_size) {
   Buffer.poolSize = minimum_pool_size;
@@ -17,64 +18,67 @@ export function json_to_cbuffer(obj: any | null): Buffer {
 
 export function string_to_cbuffer(str: string | null): Buffer {
   if (str == null) {
-    const buffer = Buffer.allocUnsafe(header_size)
-    buffer.writeInt64LE(0, 0)
-    return buffer
+    const buffer = Buffer.allocUnsafe(header_size);
+    buffer.writeInt64LE(0, 0);
+    return buffer;
   }
   // string.length returns number of two byte UTF-16 code units
-  const buffer: Buffer = Buffer.allocUnsafe(header_size + str.length * 2)
-  buffer.writeInt32LE(str.length, 0)
-  buffer.writeInt32LE(0, sizeof_int32) // Reserved - must be zero
+  const buffer: Buffer = Buffer.allocUnsafe(header_size + str.length * 2);
+  buffer.writeInt32LE(str.length, 0);
+  buffer.writeInt32LE(0, sizeof_int32); // Reserved - must be zero
   if (str.length > 0) {
-    buffer.write(str, header_size, 'utf8')
+    buffer.write(str, header_size, 'utf8');
   }
-  return buffer
+  return buffer;
 }
 
 export function int64_to_buffer(number: number): Buffer {
-  const buffer: Buffer = Buffer.allocUnsafe(64 / 8)
-  buffer.writeBigInt64LE(BigInt(number), 0)
-  return buffer
+  const buffer: Buffer = Buffer.allocUnsafe(64 / 8);
+  buffer.writeBigInt64LE(BigInt(number), 0);
+  return buffer;
 }
 
 export function buffer_to_int64(buffer: Buffer): string | number {
-  return buffer.readInt64LE(0)
+  return buffer.readInt64LE(0);
 }
 
 export function cbuffer_to_string(buf: Buffer): string {
-  const length: number = buf.readInt32LE(0)
+  const length: number = buf.readInt32LE(0);
   if (length < 0) {
-    return temp_to_string(buf, length)
+    return temp_to_string(buf, length);
   }
-  return buf.toString('utf8', header_size, length + header_size)
+  return buf.toString('utf8', header_size, length + header_size);
 }
 
 export function cbuffer_to_json(buf: Buffer): any {
-  const str = cbuffer_to_string(buf)
-  return JSON.parse(str)
+  const str = cbuffer_to_string(buf);
+  return JSON.parse(str);
 }
 
 export function cbuffer_to_buffer(buf: Buffer): Buffer {
-  const length = buf.readInt32LE(0)
+  const length = buf.readInt32LE(0);
   if (length < 0) {
-    return temp_to_buffer(buf, length)
+    return temp_to_buffer(buf, length);
   }
-  return buf.slice(header_size, header_size + length)
+  return buf.slice(header_size, header_size + length);
 }
 
 export function buffer_to_cbuffer(buf: Buffer): Buffer {
-  const buffer = Buffer.allocUnsafe(header_size + buf.byteLength)
-  buffer.writeInt32LE(buf.byteLength, 0)
-  buffer.writeInt32LE(0, sizeof_int32) // Reserved - must be zero
+  const buffer = Buffer.allocUnsafe(header_size + buf.byteLength);
+  buffer.writeInt32LE(buf.byteLength, 0);
+  buffer.writeInt32LE(0, sizeof_int32); // Reserved - must be zero
   buf.copy(buffer, header_size);
-  return buffer
+  return buffer;
 }
 
 export function allocate_cbuffer(size: number): Buffer {
-  const buffer = Buffer.allocUnsafe(header_size + size)
-  buffer.writeInt32LE(size, 0)
-  buffer.writeInt32LE(0, sizeof_int32) // Reserved - must be zero
-  return buffer
+  if (size < minimum_cbuffer_size) {
+    size = minimum_cbuffer_size;
+  }
+  const buffer = Buffer.allocUnsafe(header_size + size);
+  buffer.writeInt32LE(size, 0);
+  buffer.writeInt32LE(0, sizeof_int32); // Reserved - must be zero
+  return buffer;
 }
 
 export function load_platform_library(libraryPath: string, libraryName: string, functions: any): ffi.Library {
@@ -120,17 +124,17 @@ export function load_library_direct(libraryFilePath: string, functions: any): ff
 }
 
 function temp_to_buffer(buf: Buffer, length: number): Buffer {
-  length = 0 - length
-  const tempfilename: string = buf.toString('utf8', header_size, length + header_size)
-  const result: Buffer = fs.readFileSync(tempfilename)
-  fs.unlinkSync(tempfilename)
-  return result
+  length = 0 - length;
+  const tempfilename = buf.toString('utf8', header_size, length + header_size);
+  const result = fs.readFileSync(tempfilename);
+  fs.unlinkSync(tempfilename);
+  return result;
 }
 
 function temp_to_string(buf: Buffer, length: number): string {
-  length = 0 - length
-  const tempfilename: string = buf.toString('utf8', header_size, length + header_size)
-  const result: string = fs.readFileSync(tempfilename, 'utf8')
-  fs.unlinkSync(tempfilename)
-  return result
+  length = 0 - length;
+  const tempfilename = buf.toString('utf8', header_size, length + header_size);
+  const result = fs.readFileSync(tempfilename, 'utf8');
+  fs.unlinkSync(tempfilename);
+  return result;
 }
