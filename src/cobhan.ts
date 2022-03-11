@@ -81,6 +81,11 @@ export function allocate_cbuffer(size: number): Buffer {
   return buffer;
 }
 
+function is_alpine(): boolean {
+  const files = fs.readdirSync('/lib').filter((fn) => fn.startsWith('libc.musl'));
+  return files.length > 0;
+}
+
 export function load_platform_library(libraryPath: string, libraryName: string, functions: any): ffi.Library {
 
   let osExt = { 'win32': '.dll', 'linux': '.so', 'darwin': '.dylib' }[process.platform.toLowerCase()];
@@ -90,8 +95,7 @@ export function load_platform_library(libraryPath: string, libraryName: string, 
 
   let needChdir = false;
   if (osExt == '.so') {
-    const files = fs.readdirSync('/lib').filter((fn) => fn.startsWith('libc.musl'));
-    if (files.length > 0) {
+    if (is_alpine()) {
       osExt = '-musl.so';
       needChdir = true;
     }
