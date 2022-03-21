@@ -1,4 +1,4 @@
-name: Cobhan-Node
+name: Publish Cobhan-Node
 
 on:
   release:
