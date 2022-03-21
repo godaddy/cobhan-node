@@ -2,7 +2,7 @@ import ffi from 'ffi-napi';
 import path from 'path';
 import fs from 'fs';
 
-const header_size = 64 / 8;
+export const header_size = 64 / 8;
 const sizeof_int32 = 32 / 8;
 
 const minimum_pool_size = 131072;
