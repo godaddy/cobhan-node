@@ -22,11 +22,12 @@ export function string_to_cbuffer(str: string | null): Buffer {
     buffer.writeInt64LE(0, 0);
     return buffer;
   }
-  // string.length returns number of two byte UTF-16 code units
-  const buffer: Buffer = Buffer.allocUnsafe(header_size + str.length * 2);
+
+  const byteLength: number = Buffer.byteLength(str,'utf8');
+  const buffer: Buffer = Buffer.allocUnsafe(header_size + byteLength);
   buffer.writeInt32LE(str.length, 0);
   buffer.writeInt32LE(0, sizeof_int32); // Reserved - must be zero
-  if (str.length > 0) {
+  if (byteLength > 0) {
     buffer.write(str, header_size, 'utf8');
   }
   return buffer;
