@@ -5,7 +5,7 @@ on:
     types: [published] # Trigger when release is created
 
 jobs:
-  test:
+  publish:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     container:
