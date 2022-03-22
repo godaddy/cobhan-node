@@ -5,12 +5,7 @@ import fs from 'fs';
 const header_size = 64 / 8;
 const sizeof_int32 = 32 / 8;
 
-const minimum_pool_size = 131072;
 const minimum_cbuffer_size = 1024;
-
-if (Buffer.poolSize < minimum_pool_size) {
-  Buffer.poolSize = minimum_pool_size;
-}
 
 export function json_to_cbuffer(obj: any | null): Buffer {
   return string_to_cbuffer(JSON.stringify(obj))
