@@ -3,6 +3,9 @@
 apt-get update
 apt-get install -y jq
 
+echo "Got \$0: ${0}"
+echo "Got \$1: ${1}"
+
 if [ -z "${1}" ]; then
   echo "set-version.sh <version>"
   exit 1
